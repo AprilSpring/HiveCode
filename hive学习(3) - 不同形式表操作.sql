@@ -1,4 +1,5 @@
--- Hive-sql learning
+-- --Hive语法学习(3) - 不同形式表的操作
+
 
 --1 显示表的分区
 show partitions tablename; 
@@ -133,7 +134,8 @@ select count(1) from
 		group by a.user_id) c
 
 --例子-3
-select pin from fdm.fdm_customer_userinfo_chain where dp='ACTIVE' and user_level=50 and LIMIT 100000
+select pin from fdm.fdm_customer_userinfo_chain
+    where dp='ACTIVE' and user_level=50 and LIMIT 100000
 
 --例子-4
 select sale_ord_dt 下单日期, count(distinct sale_ord_id) 订单数, sum(Round(after_prefr_amount,2))订单金额 
