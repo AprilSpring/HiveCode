@@ -235,6 +235,7 @@ sum
 avg
 
 --字符串函数
+size
 length
 concat(s1,s2) --合并字符串 select concat(sid,number) from news;
 insert(s1,x,len,s2) --s1(x,s1)被s2替换
@@ -256,14 +257,39 @@ now()
 localtime()
 year(d) --返回d中的年份值
 month(d)
-dayname(d)
+day(d)
 hour(t)
-to_date()
+to_date(string timestamp) --只能识别到 “年-月-日” 级别的时间，无法识别 “年-月” 级别的时间
+add_months('2016-09-10',-1) --减少一个月，2016-08-10，同样不能识别到月份的日期，比如add_months('2016-09',-1)会返回null
+
+unix_timestamp() --获取当前系统时间戳
+unix_timestamp('2011-12-07 13:01:03') --日期转换为时间戳
+unix_timestamp('20111207 13:01:03', 'yyyyMMdd HH:mm:ss')) --日期转换为固定格式的时间戳
+
+from_unixtime() --时间戳转日期
+from_unixtime(1323308943,'yyyy-MM-dd HH:mm:ss')
+from_unixtime(unix_timestamp(),'yyyy-MM-dd')
+from_unixtime(unix_timestamp(),'yyyy-MM') --可以识别到月份的时间
+date_sub(from_unixtime(unix_timestamp(),'yyyy-MM-dd'),7) --获取7天前的日期
 
 
 --聚合函数
-collect_set()
-collect_list()
+collect_set() --聚合的元素进行去重
+collect_list() --与collect_set类似，元素可重复
+
+--collect_set使用举例：求出一个数据表中到今天为止首次登陆的人
+select count(a.id)
+from
+    (
+        select id, collect_set(time) as t from t_action_login
+        where time <= from_unixtime(unix_timestamp(),'yyyy-MM-dd')
+        group by id
+    ) as a
+where size(a.t)=1 and a.t[0]=from_unixtime(unix_timestamp(),'yyyy-MM-dd');
+
+--| 123@163.com        | ["20150620","20150619"]                                                                                    |
+--| abc@163.com        | ["20150816"]                                                                                               |
+--| cde@qq.com         | ["20150606","20150608","20150607"]
 
 
 
@@ -348,10 +374,17 @@ row_number() over()
 --row_number() OVER (PARTITION BY COL1 ORDER BY COL2)
 --SELECT *, row_Number() OVER (partition by COL1 ORDER BY COL2 desc) rank FROM employee
 select user_id, item_id, t.row_num from
-(select user_id, item_id, row_number() over (partition by user_id order by current_date desc) as row_num from table2) t
+(
+    select user_id, item_id, row_number() over (partition by user_id order by current_date desc
+) as row_num
+from table2) t
 where t.row_num = 1
 
-select * from (select stu_id, row_number() over(partition by class order by age desc) rank from student ) where rank<=3;
+select * from
+(
+    select stu_id, row_number() over(partition by class order by age desc) rank from student
+)
+where rank<=3;
 
 rank() over() --dense_rank() over 连续排名，与rank() over()类似
 select stu_id, class, stu_score, rank() over(order by stu_score desc) as score_rank from student where class='mysql'; --查询mysql课程的学生分数排名
@@ -361,9 +394,9 @@ select stu_id, class, stu_score, rank() over(partition by class order by stu_sco
 select stu_id,class,sum(stu_score) from student group by class,stu_id; --查询各学生总分
 
 select t.*, rank() over(order by t.sum_score desc) as total_rank from 
-(select stu_id,class,sum(stu_score) as sum_score from student as s1
-group by stu_id,class ) t
---根据总分查询学生排名(先计算总分、后排名)
+(
+    select stu_id,class, sum(stu_score) as sum_score from student as s1
+    group by stu_id,class ) t   --根据总分查询学生排名(先计算总分、后排名)
 
 sum() over()
 count() over()
@@ -387,7 +420,8 @@ data = DataFrame({'age':[21,22,23],'name':['KEN','大数据分析实战','小蚊
 data.to_sql("testTable",index=False,con=engine,if_exists='append')
 
 
-
+--14.数据抽样
+--https://blog.csdn.net/weixin_39053313/article/details/88921290
 
 
 

@@ -105,7 +105,7 @@ Select * from gdm.gdm_m04_ord_det_sum where dp='ACTIVE' and sale_ord_dt=sysdate(
 
 --查具体某个[订单]
 Select * from gdm.gdm_m04_ord_det_sum where dt>='下单时间' and sale_ord_id='订单号' and sale_ord_dt='下单时间';
-	
+
 --[昨天][某个]商品的[销量]
 Select sum(sale_qtty) from gdm.gdm_m04_ord_det_sum where dp='ACTIVE' and (item_sku_id='商品编号' or virtual_sku_id ='商品编号') and sale_ord_dt=sysdate(-1);
 
@@ -113,10 +113,20 @@ Select sum(sale_qtty) from gdm.gdm_m04_ord_det_sum where dp='ACTIVE' and (item_s
 	
 /*=========================================================================*/
 --例子-1
-select pur_bill_id 采购单号 , supp_brevity_cd 供应商简码 , create_tm 创建时间 , sku_id 商品sku , item_name 商品名称 , 
-sum(uprc) 单价 , sum(original_price) 原价 , sum(mkt_prc) 市场价 , sum(into_wh_qtty) 实际入库数量, sum(originalnum) 原始下单数量 
+select
+    pur_bill_id 采购单号 ,
+    supp_brevity_cd 供应商简码 ,
+    create_tm 创建时间 ,
+    sku_id 商品sku ,
+    item_name 商品名称 ,
+    sum(uprc) 单价 ,
+    sum(original_price) 原价 ,
+    sum(mkt_prc) 市场价 ,
+    sum(into_wh_qtty) 实际入库数量,
+    sum(originalnum) 原始下单数量
 from v_gdm_m04_pur_det_basic_sum_jd 
-where dt=sysdate(-1) and substr(create_tm, 1, 10) >= '2013-01-01' 
+where dt=sysdate(-1)
+and substr(create_tm, 1, 10) >= '2013-01-01'
 and substr(create_tm, 1, 10) <= '2013-12-31' 
 and supp_brevity_cd = 'hbssxxgl' 
 and item_third_cate_cd = '870' 
